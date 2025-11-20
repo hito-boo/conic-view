@@ -45,5 +45,49 @@ Vetor3 normalizacao(const Vetor3& v) {
         v.x / m,
         v.y / m,
         v.z / m,
-    }
+    };
+};
+
+
+// Matriz 4x4
+
+struct Mat4 {
+    double m[4][4];
+};
+
+
+vector<double> mult(const Mat4& M, const Vetor3& P) {
+    vector<double> r(4);
+    r[0] = M.m[0][0]*P.x + M.m[0][1]*P.y + M.m[0][2]*P.z + M.m[0][3]*1;
+    r[1] = M.m[1][0]*P.x + M.m[1][1]*P.y + M.m[1][2]*P.z + M.m[1][3]*1;
+    r[2] = M.m[2][0]*P.x + M.m[2][1]*P.y + M.m[2][2]*P.z + M.m[2][3]*1;
+    r[3] = M.m[3][0]*P.x + M.m[3][1]*P.y + M.m[3][2]*P.z + M.m[3][3]*1;
+    return r;
+}
+
+
+Mat4 construirMatrizPerspectiva(Vetor3 C, Vetor3 N, double d0, double d1, double d) {
+    Mat4 M;
+
+    M.m[0][0] = d + C.x * N.x;
+    M.m[0][1] = C.x * N.y;
+    M.m[0][2] = C.x * N.z;
+    M.m[0][3] = -C.x * d0;
+
+    M.m[1][0] = C.y * N.x;
+    M.m[1][1] = d + C.y * N.y;
+    M.m[1][2] = C.y * N.z;
+    M.m[1][3] = -C.y * d0;
+
+    M.m[2][0] = C.z * N.x;
+    M.m[2][1] = C.z * N.y;
+    M.m[2][2] = d + C.z * N.z;
+    M.m[2][3] = -C.z * d0;
+
+    M.m[3][0] = N.x;
+    M.m[3][1] = N.y;
+    M.m[3][2] = N.z;
+    M.m[3][3] = d1;
+
+    return M;
 }
