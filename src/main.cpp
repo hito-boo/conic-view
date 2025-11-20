@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <iomanip>
 
 using namespace std;
 
@@ -90,4 +91,81 @@ Mat4 construirMatrizPerspectiva(Vetor3 C, Vetor3 N, double d0, double d1, double
     M.m[3][3] = d1;
 
     return M;
+}
+
+
+int main() {
+    cout << fixed << setprecision(6); // quantidade de casas decimais
+    
+
+    // definição do objeto
+    // TO DO: trocar para um novo 
+    vector<Vetor3> V = {
+        {1, 1, 1},
+        {7, 1, 1},
+        {7, 1, 7},
+        {1, 1, 7},
+        {4, 7, 4},
+    };
+
+    vector<Face> faces = {
+        {{1, 2, 3, 4}},
+        {{1, 2, 5}},
+        {{2, 3, 5}},
+        {{4, 4, 5}},
+        {{4, 1, 5}},
+    };
+
+
+    // dados do plano (três pontos)
+    // plano Z=0
+    Vetor3 P1 = {0, 0, 0};
+    Vetor3 P2 = {1, 0, 0};
+    Vetor3 P3 = {0, 1, 0};
+    
+    // vetor normal ao plano
+    Vetor3 v12 = P1 - P2;
+    Vetor3 v32 = P3 - P2;
+
+    Vetor3 N = produtoVetorial(v12, v32);
+    N = normalizacao(N);
+
+
+    // ponto de vista C
+
+    Vetor3 C = {20, 10, 30};
+
+    double d0 = produtoEscalar(P1, N); // ponto no plano
+    double d1 = produtoEscalar(C, N);
+    double d = d0 - d1;
+
+    // construção da matriz de perspectiva
+
+    Mat4 M = construirMatrizPerspectiva(C, N, d0, d1, d);
+
+    cout << "Matriz de projeção:\n";
+    for (int i=0; i<4; i++) {
+        for (int j=0; j<4; j++){
+            cout << setw(10) << M.m[i][j] << " ";
+        }
+        cout << "\n";
+    }
+
+    cout << "\n\nProjeção dos vértices\n";
+
+
+    // projeção dos vértices
+
+    for (int i=0; i<V.size(); i++) {
+        auto h = mult(M, V[i]); // homogênea
+
+        double xc = h[0] / h[3];
+        double yc = h[1] / h[3];
+        double zc = h[2] / h[3];
+
+        cout << "V" << i+1 << " -> ("
+                << xc << ", " << yc << ", " << zc << ")\n";
+    }
+
+    return 0;
 }
