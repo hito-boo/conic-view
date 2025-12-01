@@ -89,12 +89,38 @@ Vetor3 calcularNormalPlano(const PlanoProjecao& plano) {
     return normalizacao(N);
 }
 
+
+/*
 void calcularBaseDoPlano(PlanoProjecao& plano) {
     // Define o eixo X
     plano.eixoXLocal = normalizacao(plano.p2 - plano.p1);
     
     // Define o eixo Y
     plano.eixoYLocal = normalizacao(produtoVetorial(calcularNormalPlano(plano), plano.eixoXLocal));
+}
+*/
+
+void calcularBaseDoPlano(PlanoProjecao& plano) {
+    // 1. O Eixo X é estritamente definido pelo vetor P1 -> P2
+    // Se P1=(1,0,0) e P2=(0,0,0), o eixo X será (-1,0,0). A imagem será espelhada.
+    // Isso é "feature", não bug. A ordem dos pontos define a orientação.
+    plano.eixoXLocal = normalizacao(plano.p2 - plano.p1);
+
+    // 2. Calculamos um vetor auxiliar P1 -> P3
+    Vetor3 vAux = normalizacao(plano.p3 - plano.p1);
+
+    // 3. Calculamos a Normal (Eixo Z)
+    // Regra da mão direita: X cruz V_Aux dá a normal saindo do plano
+    Vetor3 N = normalizacao(produtoVetorial(plano.eixoXLocal, vAux));
+
+    // 4. Calculamos o Eixo Y (Ortogonalização)
+    // Agora que temos Z (Normal) e X (Direita) perfeitos e ortogonais,
+    // o Y é simplesmente o produto vetorial entre eles.
+    // Z cruz X = Y (Cima)
+    plano.eixoYLocal = normalizacao(produtoVetorial(N, plano.eixoXLocal));
+
+    // Opcional: Debug para ver se a base é ortonormal (deve dar 0)
+    // cout << "Dot X.Y: " << produtoEscalar(plano.eixoXLocal, plano.eixoYLocal) << endl;
 }
 
 Mat4 gerarMatrizPerspectiva(const Vetor3& C, const PlanoProjecao& plano) {
@@ -225,18 +251,18 @@ int main() {
         {1, 1, 1}, {7, 1, 1}, {7, 1, 7}, {1, 1, 7}, {4, 7, 4}
     };
     piramide.faces = {
-        {{1, 2, 3, 4}}, {{1, 2, 5}}, {{2, 3, 5}}, {{4, 4, 5}}, {{4, 1, 5}}
+        {{1, 2, 3, 4}}, {{1, 2, 5}}, {{2, 3, 5}}, {{3, 4, 5}}, {{4, 1, 5}}
     };
 
     // Definição do Plano de Projeção
     PlanoProjecao plano;
-    plano.p1 = {0, 0, 1};
-    plano.p2 = {0, 0, 0};
-    plano.p3 = {1, 0, 0};
+    plano.p1 = {0, 0, 0};
+    plano.p2 = {1, 0, 0};
+    plano.p3 = {0, 1, 0};
     calcularBaseDoPlano(plano);
 
     // Definição do Observador
-    Vetor3 observador = {-4, 20, 4};
+    Vetor3 observador = {0, -10, 40};
 
     // Definição da Janela (Área 20x20 centrada na origem)
     Janela janela;
