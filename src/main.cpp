@@ -246,6 +246,7 @@ int main() {
     // Setup das entradas (hardcoded)
     
     // Definição do Objeto
+    /*
     Objeto3D piramide;
     piramide.vertices = {
         {1, 1, 1}, {7, 1, 1}, {7, 1, 7}, {1, 1, 7}, {4, 7, 4}
@@ -253,17 +254,70 @@ int main() {
     piramide.faces = {
         {{1, 2, 3, 4}}, {{1, 2, 5}}, {{2, 3, 5}}, {{3, 4, 5}}, {{4, 1, 5}}
     };
+    */
+
+    // Entrada do OBJETO 3D
+    Objeto3D objeto;
+
+    int NV;
+    cout << "Numero de vertices: ";
+    cin >> NV;
+
+    objeto.vertices.resize(NV);
+    for (int i = 0; i < NV; i++) {
+        cout << "Vertice V" << i+1 << " (x y z): ";
+        cin >> objeto.vertices[i].x >> objeto.vertices[i].y >> objeto.vertices[i].z;
+    }
+
+    int NF;
+    cout << "\nNumero de faces: ";
+    cin >> NF;
+
+    objeto.faces.resize(NF);
+    for (int i = 0; i < NF; i++) {
+        int qtd;
+        cout << "Numero de vertices da face " << i+1 << ": ";
+        cin >> qtd;
+
+        objeto.faces[i].indices.resize(qtd);
+        cout << "Indices dos vertices (ex: 1 2 5): ";
+        for (int j = 0; j < qtd; j++) {
+            cin >> objeto.faces[i].indices[j];
+        }
+    }
+
 
     // Definição do Plano de Projeção
     PlanoProjecao plano;
+    /*
     plano.p1 = {0, 0, 0};
     plano.p2 = {1, 0, 0};
     plano.p3 = {0, 1, 0};
+    */
+    cout << "\n--- Definicao do Plano de Projecao ---\n";
+
+    cout << "P1 (x y z): ";
+    cin >> plano.p1.x >> plano.p1.y >> plano.p1.z;
+
+    cout << "P2 (x y z): ";
+    cin >> plano.p2.x >> plano.p2.y >> plano.p2.z;
+
+    cout << "P3 (x y z): ";
+    cin >> plano.p3.x >> plano.p3.y >> plano.p3.z;
+
+    calcularBaseDoPlano(plano);
+
     calcularBaseDoPlano(plano);
 
     // Definição do Observador
+    /*
     Vetor3 observador = {0, -10, 40};
+    */
 
+    Vetor3 observador;
+    cout << "\nPonto de vista C (x y z): ";
+    cin >> observador.x >> observador.y >> observador.z;
+    
     // Definição da Janela (Área 20x20 centrada na origem)
     Janela janela;
     janela.xmin = -10.0;
@@ -299,10 +353,9 @@ int main() {
     vector<PontoPixel> pontosTela;
 
     // Processar os vértices
-    cout << "--- Processando Vertices ---\n";
-    for (size_t i = 0; i < piramide.vertices.size(); i++) {
+    for (size_t i = 0; i < objeto.vertices.size(); i++) {
         // Projeção
-        Vetor3 pProjetado = projetarVertice(piramide.vertices[i], matrizProj);
+        Vetor3 pProjetado = projetarVertice(objeto.vertices[i], matrizProj);
         
         // Converter orientação
         Vetor3 pLocal = converterParaSistemaDoPlano(pProjetado, plano);
@@ -315,7 +368,7 @@ int main() {
     }
 
     // Desenhar (Gerar arquivo)
-    salvarSVG("resultado.svg", pontosTela, piramide.faces, viewport);
+    salvarSVG("resultado.svg", pontosTela, objeto.faces, viewport);
 
     return 0;
 }
