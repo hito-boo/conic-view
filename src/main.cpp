@@ -54,6 +54,15 @@ vector<double> multMatrizVetor(const Mat4& M, const Vetor3& P) {
     return r;
 }
 
+bool verificaColinear(const Vetor3& p1, const Vetor3& p2, const Vetor3& p3) {
+    Vetor3 v1 = p2 - p1;
+    Vetor3 v2 = p3 - p1;
+
+    Vetor3 cross = produtoVetorial(v1, v2);
+    double magnitudeSq = produtoEscalar(cross, cross);
+    return magnitudeSq < 1e-9;
+}
+
 // Estruturas de Dados da Cena -----------------------------------------------------------------------------------------------
 
 struct Face {
@@ -89,38 +98,11 @@ Vetor3 calcularNormalPlano(const PlanoProjecao& plano) {
     return normalizacao(N);
 }
 
-
-/*
 void calcularBaseDoPlano(PlanoProjecao& plano) {
-    // Define o eixo X
     plano.eixoXLocal = normalizacao(plano.p2 - plano.p1);
-    
-    // Define o eixo Y
-    plano.eixoYLocal = normalizacao(produtoVetorial(calcularNormalPlano(plano), plano.eixoXLocal));
-}
-*/
-
-void calcularBaseDoPlano(PlanoProjecao& plano) {
-    // 1. O Eixo X é estritamente definido pelo vetor P1 -> P2
-    // Se P1=(1,0,0) e P2=(0,0,0), o eixo X será (-1,0,0). A imagem será espelhada.
-    // Isso é "feature", não bug. A ordem dos pontos define a orientação.
-    plano.eixoXLocal = normalizacao(plano.p2 - plano.p1);
-
-    // 2. Calculamos um vetor auxiliar P1 -> P3
     Vetor3 vAux = normalizacao(plano.p3 - plano.p1);
-
-    // 3. Calculamos a Normal (Eixo Z)
-    // Regra da mão direita: X cruz V_Aux dá a normal saindo do plano
     Vetor3 N = normalizacao(produtoVetorial(plano.eixoXLocal, vAux));
-
-    // 4. Calculamos o Eixo Y (Ortogonalização)
-    // Agora que temos Z (Normal) e X (Direita) perfeitos e ortogonais,
-    // o Y é simplesmente o produto vetorial entre eles.
-    // Z cruz X = Y (Cima)
     plano.eixoYLocal = normalizacao(produtoVetorial(N, plano.eixoXLocal));
-
-    // Opcional: Debug para ver se a base é ortonormal (deve dar 0)
-    // cout << "Dot X.Y: " << produtoEscalar(plano.eixoXLocal, plano.eixoYLocal) << endl;
 }
 
 Mat4 gerarMatrizPerspectiva(const Vetor3& C, const PlanoProjecao& plano) {
@@ -243,20 +225,7 @@ void salvarSVG(string nomeArquivo, const vector<PontoPixel>& pixels, const vecto
 int main() {
     cout << fixed << setprecision(6);
 
-    // Setup das entradas (hardcoded)
-    
-    // Definição do Objeto
-    /*
-    Objeto3D piramide;
-    piramide.vertices = {
-        {1, 1, 1}, {7, 1, 1}, {7, 1, 7}, {1, 1, 7}, {4, 7, 4}
-    };
-    piramide.faces = {
-        {{1, 2, 3, 4}}, {{1, 2, 5}}, {{2, 3, 5}}, {{3, 4, 5}}, {{4, 1, 5}}
-    };
-    */
-
-    // Entrada do OBJETO 3D
+    // Entrada do Objeto 3D
     Objeto3D objeto;
 
     int NV;
@@ -289,30 +258,34 @@ int main() {
 
     // Definição do Plano de Projeção
     PlanoProjecao plano;
-    /*
-    plano.p1 = {0, 0, 0};
-    plano.p2 = {1, 0, 0};
-    plano.p3 = {0, 1, 0};
-    */
+    bool pontosInvalidos = false;
+
     cout << "\n--- Definicao do Plano de Projecao ---\n";
+    cout << "Nota: Os pontos nao podem ser colineares (estar na mesma linha).\n";
 
-    cout << "P1 (x y z): ";
-    cin >> plano.p1.x >> plano.p1.y >> plano.p1.z;
+    do {
+        if (pontosInvalidos) {
+            cout << "\n[ERRO] Os pontos inseridos sao colineares! O plano nao pode ser definido.\n";
+            cout << "Por favor, insira pontos que formem um triangulo valido.\n\n";
+        }
 
-    cout << "P2 (x y z): ";
-    cin >> plano.p2.x >> plano.p2.y >> plano.p2.z;
+        cout << "P1 (x y z): ";
+        cin >> plano.p1.x >> plano.p1.y >> plano.p1.z;
 
-    cout << "P3 (x y z): ";
-    cin >> plano.p3.x >> plano.p3.y >> plano.p3.z;
+        cout << "P2 (x y z): ";
+        cin >> plano.p2.x >> plano.p2.y >> plano.p2.z;
 
-    calcularBaseDoPlano(plano);
+        cout << "P3 (x y z): ";
+        cin >> plano.p3.x >> plano.p3.y >> plano.p3.z;
+
+        // Verificação
+        pontosInvalidos = verificaColinear(plano.p1, plano.p2, plano.p3);
+
+    } while (pontosInvalidos);
 
     calcularBaseDoPlano(plano);
 
     // Definição do Observador
-    /*
-    Vetor3 observador = {0, -10, 40};
-    */
 
     Vetor3 observador;
     cout << "\nPonto de vista C (x y z): ";
