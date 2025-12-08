@@ -1,0 +1,50 @@
+// Alunos:
+Lucas de Oliveira Fratus (RA: 134698)
+Vitor da Rocha Machado (RA: 132769)
+
+- Como compilar
+
+#Linux
+Abra o terminal na pasta raiz do projeto e execute:
+
+g++ conic-view.cpp -o conic-view -std=c++17
+
+Isso gerará o executável: conic-view
+
+
+#Windows
+No PowerShell / prompt de commando, execute:
+
+g++ conic-view.cpp -o conic-view.exe -std=c++17
+
+É possível executar o .exe enviado dentro da pasta do projeto caso não possua o compilador g++.
+
+
+- Execução
+#Linux
+No terminal, na rasta raiz do projeto execute:
+./conix-view
+
+#Windows
+Execute o programa com extensão ".exe"
+
+Modos de entrada:
+
+# Arquivo de entrada
+Linux:
+./conic-view < arq_entrada.txt
+
+Windows:
+conic-view.exe < arq_entrada.txt
+
+* O arquivo entrada-exemplo.txt já contem um exemplo complete.
+
+# Modo interativo
+
+O programa irá solicitar:
+- Número de vértices
+- Coordenadas dos vértices
+- Número de faces
+- Índices das faces
+- Três pontos do plano de projeção
+- Ponto de vista (observador)
